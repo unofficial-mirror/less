@@ -251,6 +251,11 @@ AC_TRY_COMPILE([#include <sys/types.h>
   [struct stat s; dev_t dev = s.st_dev; ino_t ino = s.st_ino;],
   [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_STAT_INO)], [AC_MSG_RESULT(no)])
 
+# Checks for ANSI function prototypes.
+AC_MSG_CHECKING(for ANSI function prototypes)
+AC_TRY_COMPILE([], [int f(int a) { return a; }],
+  [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_ANSI_PROTOS)], [AC_MSG_RESULT(no)])
+
 # Checks for library functions.
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([fsync popen _setjmp sigprocmask sigsetmask snprintf stat system fchmod])
@@ -365,13 +370,13 @@ fi
 
 # Compile in secure mode?
 AC_ARG_WITH(secure,
-  [  --with-secure  Compile in secure mode],
+  [  --with-secure           Compile in secure mode],
   AC_DEFINE(SECURE_COMPILE, 1), AC_DEFINE(SECURE_COMPILE, 0))
 
 # Should we use floating point?
 AC_MSG_CHECKING(for floating point)
 AC_ARG_WITH(no-float,
-  [  --with-no-float  Do not use floating point],
+  [  --with-no-float         Do not use floating point],
   WANT_NO_FLOAT=1, WANT_NO_FLOAT=0)
 if test $WANT_NO_FLOAT = 0; then
   AC_TRY_LINK(, [double f1 = 12.5; double f2 = f1*f1/2.5;], 
@@ -388,7 +393,7 @@ supported_regex=""
 # Select a regular expression library.
 WANT_REGEX=auto
 AC_ARG_WITH(regex,
-  [  --with-regex={auto,gnu,pcre,posix,regcmp,re_comp,regcomp,regcomp-local,none}  Select a regular expression library  [auto]],
+  [  --with-regex=LIB        select regular expression library (LIB is one of auto,none,gnu,pcre,posix,regcmp,re_comp,regcomp,regcomp-local) [[auto]]],
   WANT_REGEX="$withval")
 
 if test $have_regex = no; then
@@ -484,7 +489,7 @@ fi
 AC_MSG_RESULT(regular expression library: $supported_regex)
 
 AC_ARG_WITH(editor,
-  [  --with-editor=PROGRAM   use PROGRAM as the default editor [vi]],
+  [  --with-editor=PROGRAM   use PROGRAM as the default editor [[vi]]],
   AC_DEFINE_UNQUOTED(EDIT_PGM, "$withval"), AC_DEFINE(EDIT_PGM, "vi"))
 
 AH_TOP([
@@ -621,6 +626,11 @@ AH_TOP([
 #define TGETENT_OK  1
 
 /*
+ * HAVE_ANSI_PROTOS	is 1 if your compiler supports ANSI function prototypes.
+ */
+#define HAVE_ANSI_PROTOS	1
+
+/*
  * HAVE_SYS_TYPES_H is 1 if your system has <sys/types.h>.
  */
 #define HAVE_SYS_TYPES_H	1
@@ -649,7 +659,7 @@ AH_TOP([
 /*
  * Default shell metacharacters and meta-escape character.
  */
-#define	DEF_METACHARS	"; *?\t\n'\"()<>[]|&^`#\\$%=~"
+#define	DEF_METACHARS	"; *?\t\n'\"()<>[]|&^`#\\$%=~{},"
 #define	DEF_METAESCAPE	"\\"
 
 /* 
